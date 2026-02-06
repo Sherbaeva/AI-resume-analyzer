@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Candidate Comparison - Resume Analyzer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f7;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        header {
+            background: white;
+            padding: 20px 40px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: #f0f0f5;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .logo-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo-text h1 {
+            font-size: 18px;
+            color: #1a1a1a;
+            font-weight: 600;
+        }
+
+        .logo-text p {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .nav-link {
+            padding: 8px 16px;
+            color: #5856d6;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 6px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nav-link:hover {
+            background: #f0f0f5;
+        }
+
+        .nav-link.active {
+            background: #5856d6;
+            color: white;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        /* Page Header */
+        .page-header {
+            margin-bottom: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .page-title-section {
+            flex: 1;
+        }
+
+        .page-title {
+            font-size: 32px;
+            color: #1a1a1a;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .page-subtitle {
+            font-size: 15px;
+            color: #666;
+        }
+
+        .export-btn {
+            padding: 12px 24px;
+            background: #5856d6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+
+        .export-btn:hover {
+            background: #4745b8;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(88, 86, 214, 0.3);
+        }
+
+        .export-btn::before {
+            content: "⬇";
+        }
+
+        /* Ranking Card */
+        .ranking-card {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+        }
+
+        .ranking-title {
+            font-size: 20px;
+            color: #1a1a1a;
+            font-weight: 600;
+            margin-bottom: 30px;
+        }
+
+        /* Comparison Table */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .comparison-table thead {
+            border-bottom: 2px solid #e5e5e7;
+        }
+
+        .comparison-table th {
+            padding: 15px;
+            text-align: left;
+            font-size: 11px;
+            font-weight: 600;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        .comparison-table th:first-child {
+            width: 60px;
+        }
+
+        .comparison-table tbody tr {
+            border-bottom: 1px solid #f0f0f5;
+            transition: background 0.3s;
+        }
+
+        .comparison-table tbody tr:hover {
+            background: #fafafa;
+        }
+
+        .comparison-table td {
+            padding: 20px 15px;
+        }
+
+        /* Rank Badge */
+        .rank-badge {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .rank-1 {
+            background: #ffd700;
+            color: #856404;
+        }
+
+        .rank-2 {
+            background: #c0c0c0;
+            color: #5a5a5a;
+        }
+
+        .rank-3 {
+            background: #cd7f32;
+            color: white;
+        }
+
+        .rank-other {
+            background: #f0f0f5;
+            color: #666;
+        }
+
+        /* Candidate Name */
+        .candidate-name {
+            font-weight: 600;
+            color: #1a1a1a;
+            font-size: 15px;
+        }
+
+        /* Score Badges */
+        .score-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .score-high {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .score-medium {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .score-low {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Skills Pills */
+        .skills-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .skill-pill {
+            padding: 4px 10px;
+            background: #e8e8ed;
+            color: #333;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .skill-pill.matched {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .skill-pill.missing {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Experience Badge */
+        .experience-badge {
+            padding: 6px 12px;
+            background: #f0f0f5;
+            border-radius: 6px;
+            font-size: 13px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        /* Compare Checkbox */
+        .compare-checkbox {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #5856d6;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .empty-state-title {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .empty-state-text {
+            font-size: 14px;
+            color: #999;
+        }
+
+        .go-to-dashboard {
+            margin-top: 20px;
+            padding: 12px 24px;
+            background: #5856d6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .go-to-dashboard:hover {
+            background: #4745b8;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            header {
+                padding: 15px 20px;
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .nav-links {
+                width: 100%;
+                justify-content: space-around;
+            }
+
+            .page-header {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .export-btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .ranking-card {
+                padding: 25px;
+                overflow-x: auto;
+            }
+
+            .comparison-table {
+                min-width: 800px;
+            }
+
+            .page-title {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="logo-section">
+            <div class="logo-icon">👥</div>
+            <div class="logo-text">
+                <h1>Resume Analyzer</h1>
+                <p>AI-Powered Hiring Assistant</p>
+            </div>
+        </div>
+        <nav class="nav-links">
+            <a href="resume-analyzer.html" class="nav-link">📊 Dashboard</a>
+            <a href="comparison.html" class="nav-link active">📈 Comparison</a>
+            <a href="#" class="nav-link">⚙️ Admin</a>
+        </nav>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="page-title-section">
+                <h1 class="page-title">Candidate Comparison</h1>
+                <p class="page-subtitle">Compare candidates side-by-side to make better hiring decisions</p>
+            </div>
+            <button class="export-btn" onclick="exportResults()">Export Results</button>
+        </div>
+
+        <!-- Overall Ranking Card -->
+        <div class="ranking-card">
+            <h2 class="ranking-title">Overall Ranking</h2>
+
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>RANK</th>
+                        <th>CANDIDATE NAME</th>
+                        <th>MATCH SCORE</th>
+                        <th>MATCHED SKILLS</th>
+                        <th>MISSING SKILLS</th>
+                        <th>EXPERIENCE</th>
+                        <th>COMPARE</th>
+                    </tr>
+                </thead>
+                <tbody id="comparisonTableBody">
+                    <!-- Data will be inserted here -->
+                </tbody>
+            </table>
+
+            <div id="emptyState" class="empty-state">
+                <div class="empty-state-icon">📊</div>
+                <div class="empty-state-title">No candidates to compare</div>
+                <div class="empty-state-text">Analyze resumes first to see the comparison</div>
+                <a href="resume-analyzer.html" class="go-to-dashboard">Go to Dashboard</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample candidate data (in real app, this would come from the analysis)
+        const candidates = [
+            {
+                rank: 1,
+                name: "Sarah Johnson",
+                matchScore: 92,
+                matchedSkills: ["JavaScript", "React", "Node.js", "Python"],
+                missingSkills: ["AWS"],
+                experience: 8
+            },
+            {
+                rank: 2,
+                name: "Michael Chen",
+                matchScore: 87,
+                matchedSkills: ["JavaScript", "React", "Python"],
+                missingSkills: ["Node.js", "AWS"],
+                experience: 6
+            },
+            {
+                rank: 3,
+                name: "Emily Rodriguez",
+                matchScore: 84,
+                matchedSkills: ["JavaScript", "Python", "AWS"],
+                missingSkills: ["React", "Node.js"],
+                experience: 7
+            },
+            {
+                rank: 4,
+                name: "David Kim",
+                matchScore: 78,
+                matchedSkills: ["JavaScript", "React"],
+                missingSkills: ["Node.js", "Python", "AWS"],
+                experience: 5
+            },
+            {
+                rank: 5,
+                name: "Lisa Anderson",
+                matchScore: 75,
+                matchedSkills: ["JavaScript", "Node.js"],
+                missingSkills: ["React", "Python", "AWS"],
+                experience: 4
+            }
+        ];
+
+        // Load data from localStorage if available
+        function loadCandidates() {
+            const storedData = localStorage.getItem('analyzedCandidates');
+            if (storedData) {
+                return JSON.parse(storedData);
+            }
+            return candidates; // Use sample data if no stored data
+        }
+
+        // Display comparison table
+        function displayComparison() {
+            const tableBody = document.getElementById('comparisonTableBody');
+            const emptyState = document.getElementById('emptyState');
+            const candidateData = loadCandidates();
+
+            if (candidateData.length === 0) {
+                tableBody.innerHTML = '';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            emptyState.style.display = 'none';
+
+            tableBody.innerHTML = candidateData.map(candidate => {
+                const rankClass = candidate.rank === 1 ? 'rank-1' : 
+                                 candidate.rank === 2 ? 'rank-2' : 
+                                 candidate.rank === 3 ? 'rank-3' : 'rank-other';
+                
+                const scoreClass = candidate.matchScore >= 85 ? 'score-high' : 
+                                  candidate.matchScore >= 70 ? 'score-medium' : 'score-low';
+
+                return `
+                    <tr>
+                        <td>
+                            <div class="rank-badge ${rankClass}">
+                                ${candidate.rank}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="candidate-name">${candidate.name}</div>
+                        </td>
+                        <td>
+                            <span class="score-badge ${scoreClass}">
+                                ${candidate.matchScore}%
+                            </span>
+                        </td>
+                        <td>
+                            <div class="skills-container">
+                                ${candidate.matchedSkills.map(skill => 
+                                    `<span class="skill-pill matched">${skill}</span>`
+                                ).join('')}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="skills-container">
+                                ${candidate.missingSkills.map(skill => 
+                                    `<span class="skill-pill missing">${skill}</span>`
+                                ).join('')}
+                            </div>
+                        </td>
+                        <td>
+                            <span class="experience-badge">${candidate.experience} years</span>
+                        </td>
+                        <td>
+                            <input type="checkbox" class="compare-checkbox" data-name="${candidate.name}">
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Export results
+        function exportResults() {
+            const candidateData = loadCandidates();
+            
+            if (candidateData.length === 0) {
+                alert('No data to export. Please analyze resumes first.');
+                return;
+            }
+
+            // Create CSV content
+            const headers = ['Rank', 'Name', 'Match Score', 'Matched Skills', 'Missing Skills', 'Experience'];
+            const csvContent = [
+                headers.join(','),
+                ...candidateData.map(c => [
+                    c.rank,
+                    c.name,
+                    c.matchScore + '%',
+                    '"' + c.matchedSkills.join(', ') + '"',
+                    '"' + c.missingSkills.join(', ') + '"',
+                    c.experience + ' years'
+                ].join(','))
+            ].join('\n');
+
+            // Download CSV
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'candidate-comparison-' + new Date().toISOString().split('T')[0] + '.csv';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+
+            alert('Results exported successfully!');
+        }
+
+        // Load comparison on page load
+        window.addEventListener('load', function() {
+            displayComparison();
+
+            // Add event listener for compare checkboxes
+            document.addEventListener('change', function(e) {
+                if (e.target.classList.contains('compare-checkbox')) {
+                    const checkedBoxes = document.querySelectorAll('.compare-checkbox:checked');
+                    if (checkedBoxes.length > 0) {
+                        console.log('Selected candidates:', 
+                            Array.from(checkedBoxes).map(cb => cb.dataset.name)
+                        );
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
