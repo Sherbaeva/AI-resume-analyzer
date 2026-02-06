@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Analyzer - AI-Powered Hiring Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f7;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        header {
+            background: white;
+            padding: 20px 40px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: #f0f0f5;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .logo-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo-text h1 {
+            font-size: 18px;
+            color: #1a1a1a;
+            font-weight: 600;
+        }
+
+        .logo-text p {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .nav-link {
+            padding: 8px 16px;
+            color: #5856d6;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 6px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nav-link:hover {
+            background: #f0f0f5;
+        }
+
+        .nav-link.active {
+            background: #5856d6;
+            color: white;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        /* Analysis Card */
+        .analysis-card {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+            margin-bottom: 30px;
+        }
+
+        .card-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 22px;
+            color: #1a1a1a;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+
+        .card-title::before {
+            content: "✨";
+            font-size: 24px;
+        }
+
+        /* Input Section */
+        .input-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 12px;
+        }
+
+        .text-area {
+            width: 100%;
+            min-height: 200px;
+            padding: 16px;
+            border: 2px solid #e5e5e7;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+
+        .text-area:focus {
+            outline: none;
+            border-color: #5856d6;
+        }
+
+        .text-area::placeholder {
+            color: #999;
+        }
+
+        /* Upload Area */
+        .upload-area {
+            width: 100%;
+            min-height: 200px;
+            border: 2px dashed #d0d0d5;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            padding: 30px;
+        }
+
+        .upload-area:hover {
+            border-color: #5856d6;
+            background: #f9f9fb;
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            color: #999;
+        }
+
+        .upload-text {
+            color: #5856d6;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .upload-text span {
+            color: #666;
+        }
+
+        .upload-hint {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        /* Uploaded Files List */
+        .uploaded-files {
+            margin-top: 15px;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px;
+            background: #f9f9fb;
+            border-radius: 6px;
+            margin-bottom: 8px;
+        }
+
+        .file-name {
+            font-size: 13px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .file-name::before {
+            content: "📄";
+        }
+
+        .remove-file {
+            background: #ff3b30;
+            color: white;
+            border: none;
+            padding: 4px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .remove-file:hover {
+            background: #e03228;
+        }
+
+        /* Buttons */
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .upload-file-btn {
+            padding: 10px 20px;
+            background: white;
+            border: 2px solid #e5e5e7;
+            border-radius: 8px;
+            color: #1a1a1a;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+
+        .upload-file-btn:hover {
+            border-color: #5856d6;
+            color: #5856d6;
+        }
+
+        .tip-text {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .analyze-btn {
+            padding: 12px 32px;
+            background: #5856d6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+
+        .analyze-btn:hover {
+            background: #4745b8;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(88, 86, 214, 0.3);
+        }
+
+        .analyze-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .analyze-btn::before {
+            content: "✨";
+        }
+
+        /* Results Section */
+        .results-card {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .results-title {
+            font-size: 20px;
+            color: #1a1a1a;
+            font-weight: 600;
+        }
+
+        .results-count {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .compare-btn {
+            padding: 10px 20px;
+            background: white;
+            border: 2px solid #5856d6;
+            border-radius: 8px;
+            color: #5856d6;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .compare-btn:hover {
+            background: #5856d6;
+            color: white;
+        }
+
+        /* Results Table */
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .results-table thead {
+            border-bottom: 2px solid #e5e5e7;
+        }
+
+        .results-table th {
+            padding: 15px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .results-table td {
+            padding: 20px 15px;
+            border-bottom: 1px solid #f0f0f5;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        /* Match Score Badge */
+        .match-score {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .match-high {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .match-medium {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .match-low {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Status Badge */
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-reviewed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-rejected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Actions */
+        .action-btn {
+            padding: 6px 12px;
+            background: #f0f0f5;
+            border: none;
+            border-radius: 6px;
+            color: #5856d6;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 12px;
+            margin-right: 5px;
+            transition: all 0.3s;
+        }
+
+        .action-btn:hover {
+            background: #5856d6;
+            color: white;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            header {
+                padding: 15px 20px;
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .nav-links {
+                width: 100%;
+                justify-content: space-around;
+            }
+
+            .input-section {
+                grid-template-columns: 1fr;
+            }
+
+            .analysis-card, .results-card {
+                padding: 25px;
+            }
+
+            .button-group {
+                flex-direction: column;
+                gap: 15px;
+                align-items: stretch;
+            }
+
+            .analyze-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="logo-section">
+            <div class="logo-icon">👥</div>
+            <div class="logo-text">
+                <h1>Resume Analyzer</h1>
+                <p>AI-Powered Hiring Assistant</p>
+            </div>
+        </div>
+        <nav class="nav-links">
+            <a href="#" class="nav-link active">📊 Dashboard</a>
+            <a href="#" class="nav-link">📈 Comparison</a>
+            <a href="#" class="nav-link">⚙️ Admin</a>
+        </nav>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- AI Resume Analysis Card -->
+        <div class="analysis-card">
+            <h2 class="card-title">AI Resume Analysis</h2>
+
+            <div class="input-section">
+                <!-- Job Description -->
+                <div class="input-group">
+                    <label class="input-label">Job Description</label>
+                    <textarea 
+                        class="text-area" 
+                        id="jobDescription"
+                        placeholder="Paste job description here or upload a file..."
+                    ></textarea>
+                    <button class="upload-file-btn" onclick="document.getElementById('jobFileInput').click()">
+                        📤 Upload File
+                    </button>
+                    <input type="file" id="jobFileInput" class="file-input" accept=".txt,.pdf,.doc,.docx">
+                </div>
+
+                <!-- Candidate Resumes -->
+                <div class="input-group">
+                    <label class="input-label">Candidate Resumes</label>
+                    <div class="upload-area" onclick="document.getElementById('resumeFileInput').click()">
+                        <div class="upload-icon">📄</div>
+                        <div class="upload-text">
+                            Click to upload <span>or drag and drop</span>
+                        </div>
+                        <div class="upload-hint">PDF or DOCX (max 10MB each)</div>
+                    </div>
+                    <input 
+                        type="file" 
+                        id="resumeFileInput" 
+                        class="file-input" 
+                        accept=".pdf,.doc,.docx" 
+                        multiple
+                    >
+                    <div id="uploadedFilesList" class="uploaded-files"></div>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <div class="tip-text">
+                    <strong>Tip:</strong> Upload multiple resumes to analyze them in batch
+                </div>
+                <button class="analyze-btn" id="analyzeBtn" onclick="analyzeResumes()">
+                    Analyze Resumes
+                </button>
+            </div>
+        </div>
+
+        <!-- Analysis Results Card -->
+        <div class="results-card">
+            <div class="results-header">
+                <div>
+                    <h2 class="results-title">Analysis Results</h2>
+                    <p class="results-count" id="resultsCount">0 candidates analyzed</p>
+                </div>
+                <button class="compare-btn" onclick="compareAll()">Compare All</button>
+            </div>
+
+            <table class="results-table">
+                <thead>
+                    <tr>
+                        <th>CANDIDATE</th>
+                        <th>MATCH SCORE</th>
+                        <th>STATUS</th>
+                        <th>EXPERIENCE</th>
+                        <th>ACTIONS</th>
+                    </tr>
+                </thead>
+                <tbody id="resultsTableBody">
+                    <tr>
+                        <td colspan="5">
+                            <div class="empty-state">
+                                <div class="empty-state-icon">📋</div>
+                                <div>No candidates analyzed yet. Upload resumes and run analysis.</div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let uploadedResumes = [];
+
+        // Handle resume file uploads
+        document.getElementById('resumeFileInput').addEventListener('change', function(e) {
+            const files = Array.from(e.target.files);
+            
+            files.forEach(file => {
+                if (file.size > 10 * 1024 * 1024) {
+                    alert(`${file.name} is too large. Max size is 10MB.`);
+                    return;
+                }
+                
+                uploadedResumes.push({
+                    name: file.name,
+                    file: file
+                });
+            });
+            
+            displayUploadedFiles();
+        });
+
+        // Display uploaded files
+        function displayUploadedFiles() {
+            const container = document.getElementById('uploadedFilesList');
+            
+            if (uploadedResumes.length === 0) {
+                container.innerHTML = '';
+                return;
+            }
+            
+            container.innerHTML = uploadedResumes.map((resume, index) => `
+                <div class="file-item">
+                    <span class="file-name">${resume.name}</span>
+                    <button class="remove-file" onclick="removeFile(${index})">Remove</button>
+                </div>
+            `).join('');
+        }
+
+        // Remove uploaded file
+        function removeFile(index) {
+            uploadedResumes.splice(index, 1);
+            displayUploadedFiles();
+        }
+
+        // Analyze resumes
+        function analyzeResumes() {
+            const jobDescription = document.getElementById('jobDescription').value;
+            
+            if (!jobDescription.trim()) {
+                alert('Please enter a job description first.');
+                return;
+            }
+            
+            if (uploadedResumes.length === 0) {
+                alert('Please upload at least one resume.');
+                return;
+            }
+            
+            // Show loading state
+            const btn = document.getElementById('analyzeBtn');
+            btn.textContent = 'Analyzing...';
+            btn.disabled = true;
+            
+            // Simulate AI analysis
+            setTimeout(() => {
+                const results = uploadedResumes.map(resume => ({
+                    name: resume.name.replace(/\.[^/.]+$/, ""),
+                    matchScore: Math.floor(Math.random() * 40) + 60,
+                    status: ['Pending', 'Reviewed', 'Pending'][Math.floor(Math.random() * 3)],
+                    experience: Math.floor(Math.random() * 10) + 1
+                }));
+                
+                displayResults(results);
+                
+                btn.textContent = '✨ Analyze Resumes';
+                btn.disabled = false;
+            }, 2000);
+        }
+
+        // Display results
+        function displayResults(results) {
+            const tbody = document.getElementById('resultsTableBody');
+            document.getElementById('resultsCount').textContent = `${results.length} candidates analyzed`;
+            
+            if (results.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5">
+                            <div class="empty-state">
+                                <div class="empty-state-icon">📋</div>
+                                <div>No candidates analyzed yet. Upload resumes and run analysis.</div>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tbody.innerHTML = results.map(result => {
+                const matchClass = result.matchScore >= 80 ? 'match-high' : 
+                                  result.matchScore >= 60 ? 'match-medium' : 'match-low';
+                const statusClass = result.status === 'Reviewed' ? 'status-reviewed' : 
+                                   result.status === 'Rejected' ? 'status-rejected' : 'status-pending';
+                
+                return `
+                    <tr>
+                        <td><strong>${result.name}</strong></td>
+                        <td>
+                            <span class="match-score ${matchClass}">
+                                ${result.matchScore}%
+                            </span>
+                        </td>
+                        <td>
+                            <span class="status-badge ${statusClass}">
+                                ${result.status}
+                            </span>
+                        </td>
+                        <td>${result.experience} years</td>
+                        <td>
+                            <button class="action-btn" onclick="viewDetails('${result.name}')">View</button>
+                            <button class="action-btn" onclick="downloadReport('${result.name}')">Download</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Compare all candidates
+        function compareAll() {
+            alert('Comparison view coming soon! This will show a side-by-side comparison of all analyzed candidates.');
+        }
+
+        // View candidate details
+        function viewDetails(name) {
+            alert(`Viewing detailed analysis for: ${name}\n\nThis would show:\n- Skills match\n- Experience breakdown\n- Education alignment\n- Strengths & weaknesses\n- AI recommendations`);
+        }
+
+        // Download report
+        function downloadReport(name) {
+            alert(`Downloading detailed report for: ${name}\n\nThe report includes:\n- Complete analysis\n- Match score breakdown\n- Interview recommendations\n- PDF format`);
+        }
+
+        // Handle job description file upload
+        document.getElementById('jobFileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    document.getElementById('jobDescription').value = `[Content from ${file.name}]`;
+                };
+                reader.readAsText(file);
+            }
+        });
+    </script>
+</body>
+</html>
