@@ -1,0 +1,46 @@
+FROM python:3.12-slim AS builder
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# ─── Production image ────────────────────────────────────────
+FROM python:3.12-slim
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpq-dev \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+RUN groupadd -g 10001 atsgroup && \
+    useradd -u 10001 -g atsgroup -s /bin/sh atsuser
+
+# Copy installed packages from builder
+COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
+COPY --from=builder /usr/local/bin /usr/local/bin
+
+# Copy application code
+COPY . .
+
+# Create storage dir
+RUN mkdir -p storage/resumes && \
+    chown -R atsuser:atsgroup /app
+
+# Make entrypoint executable
+RUN chmod +x entrypoint.sh
+
+HEALTHCHECK --interval=30s --timeout=5s \
+  CMD curl -f http://localhost:8000/health || exit 1
+
+EXPOSE 8000
+
+USER atsuser
+
+ENTRYPOINT ["./entrypoint.sh"]

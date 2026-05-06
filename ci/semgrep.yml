@@ -1,0 +1,37 @@
+semgrep_scan:
+  stage: security
+  image: 
+    name: returntocorp/semgrep:latest
+    entrypoint: [""]
+  script:
+    - echo " Starting Semgrep SAST Scan..."
+    # --config auto : Automatically detects if it's Python, JS, React, Go, etc., and uses the best rules
+    # --error : Forces Semgrep to show errors but not crash the build
+    - semgrep scan --config auto .
+  allow_failure: true
+
+# ==========================================
+# SEMGREP SCANNER (SAST / Code Logic)
+# ==========================================
+# CHEAT SHEET FOR FUTURE CUSTOMIZATION:
+#
+# 1. Scan for specific Compliance/Languages instead of 'auto':
+#    --config "p/owasp-top-ten"  (Only OWASP rules for auditors)
+#    --config "p/python"         (Only Python rules for speed)
+#    --config "p/secrets"        (Only look for hardcoded API keys)
+#
+# 2. Block the pipeline on errors:
+#    Change `--error` to `--strict` (Fails if any high-severity bug is found)
+#
+# 3. How to ignore specific folders/files (like tests):
+#    Create a file named `.semgrepignore` in the root of the repo.
+#    Add paths to it (e.g., tests/ or *.test.js).
+#
+# 4. Output a JSON report for Dashboards (Wazuh/DefectDojo):
+#    --json -o semgrep-report.json
+#
+#    You can write your own Semgrep rules. For example: 
+#    "In our company, nobody is allowed to use md5 hashing. 
+#    If anyone types hashlib.md5(), fail the build.
+#    " You would run: --config my-company-rules.yaml. 
+# ==========================================
